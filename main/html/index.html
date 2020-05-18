@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>title</title>
+<link rel="shortcut icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=" type="image/x-icon">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<style>
+#controls {
+  width: 400px;
+  margin: 20px;
+}
+.slider {
+  margin: 5px 5px 10px 5px;
+}
+[data-ch='1'] .ui-slider-handle {
+  background-color: #fff;
+}
+[data-ch='2'] .ui-slider-handle {
+  background-color: #ffc;
+}
+[data-ch='3'] .ui-slider-handle {
+  background-color: #f33;
+}
+[data-ch='4'] .ui-slider-handle {
+  background-color: #3f3;
+}
+[data-ch='5'] .ui-slider-handle {
+  background-color: #33f;
+}
+</style>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript">
+$(function() {
+  window.duty = [0, 0, 0, 0, 0];
+  $.getJSON("/get", function(data) {
+    console.log(data);
+    if ('duty' in data) {
+      window.duty = data.duty;
+    }
+    if ('target' in data) {
+      window.target = data.target;
+      var i;
+      for (i = 0; i < window.target.length; i++) {
+        $('[data-ch='+i+']').slider('value', window.target[i]*1000);
+      }
+    }
+    if ('mode' in data) {
+      $("[name=mode]").val(data.mode);
+    }
+  });
+  $(".slider").slider({
+    "max": 1000,
+  }).on('slidechange', function(e) {
+    if (!e.originalEvent)
+      return;
+    t = $(e.target);
+    ch = t.data('ch');
+    val = t.slider('value')/1000;
+    window.target[ch] = val;
+    $.get("/set?target=" + window.target.join(','));
+  });
+  $("[name=mode]").on('change', function() {
+    $.get("/set?mode=" + this.value);
+  });
+});
+</script>
+</head>
+<body>
+<div id="controls">
+<select name="mode">
+  <option value="0">OFF</option>
+  <option value="1">DEMO</option>
+  <option value="2">USER</option>
+</select><br /><br />
+<!-- DBG<div class="slider" data-ch="0"></div> -->
+CW<div class="slider" data-ch="1"></div>
+WW<div class="slider" data-ch="2"></div>
+R<div class="slider" data-ch="3"></div>
+G<div class="slider" data-ch="4"></div>
+B<div class="slider" data-ch="5"></div>
+</controls>
+</body>
+</html>
