@@ -1,0 +1,21 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP AP63205
+D 340kHz 18V 2A Synchronois DC/DC Buck Converter
+K buck switching converter
+F https://www.diodes.com/assets/Datasheets/AP6502.pdf
+$ENDCMP
+#
+$CMP AP6503
+D 340kHz 23V 3A Synchonous DC/DC Buck Converter
+K buck switching converter
+F https://www.diodes.com/assets/Datasheets/AP6503.pdf
+$ENDCMP
+#
+$CMP Q_NMOS_SSSGD
+D N-MOSFET transistor, source/gate/drain
+K transistor NMOS N-MOS N-MOSFET
+F ~
+$ENDCMP
+#
+#End Doc Library
