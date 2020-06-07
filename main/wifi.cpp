@@ -42,16 +42,16 @@ void Wifi::setup()
 		wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
 
 		esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
-		esp_netif_set_hostname(sta_netif, "lights");
-		esp_wifi_init(&cfg);
+		ESP_ERROR_CHECK(esp_netif_set_hostname(sta_netif, "lights"));
+		ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
 		// ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, NULL));
 		ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &Wifi::wifi_event_handler, this, NULL));
 
-		esp_wifi_set_mode(WIFI_MODE_STA);
-		esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config);
-		esp_wifi_start();
-		esp_wifi_connect();
+		ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+		ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+		ESP_ERROR_CHECK(esp_wifi_start());
+		ESP_ERROR_CHECK(esp_wifi_connect());
 	}
 }
 
