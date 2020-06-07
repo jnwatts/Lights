@@ -443,7 +443,7 @@ U 1 1 5EC89EAF
 P 4050 3950
 F 0 "C3" H 4165 3996 50  0000 L CNN
 F 1 "22uF" H 4165 3905 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 4088 3800 50  0001 C CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolde" H 4088 3800 50  0001 C CNN
 F 3 "~" H 4050 3950 50  0001 C CNN
 	1    4050 3950
 	1    0    0    -1  
@@ -744,4 +744,14 @@ Text Notes 7400 7500 0    50   ~ 0
 Lights
 Text Notes 8150 7650 0    50   ~ 0
 2020-05-21
+Text Notes 5050 3900 0    50   ~ 0
+IO2 W
+Text Notes 5050 4000 0    50   ~ 0
+IO0 R
+Text Notes 5050 4100 0    50   ~ 0
+IO4 B
+Text Notes 5050 4200 0    50   ~ 0
+IO16 WW
+Text Notes 5050 4300 0    50   ~ 0
+IO17 G
 $EndSCHEMATC
