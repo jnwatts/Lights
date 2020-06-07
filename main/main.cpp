@@ -24,8 +24,8 @@ void app_main(void)
 {
 	printf("Lights v1.0\n");
 
-	xTaskCreatePinnedToCore((TaskFunction_t)&wifiFunc, "task_wifi", LIGHTS_STACK_SIZE, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore((TaskFunction_t)&lightsFunc, "task_lights", WIFI_STACK_SIZE, NULL, 1, NULL, 1);
+	xTaskCreatePinnedToCore((TaskFunction_t)&wifiFunc, "task_wifi", WIFI_STACK_SIZE, NULL, 1, NULL, 0);
+	xTaskCreatePinnedToCore((TaskFunction_t)&lightsFunc, "task_lights", LIGHTS_STACK_SIZE, NULL, 1, NULL, 1);
 
 	for (;;) {
 		vTaskDelay(1000);
