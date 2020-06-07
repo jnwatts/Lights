@@ -13,10 +13,10 @@
 static constexpr int led_pins[Lights::CH_COUNT] = {
 	[Lights::CH_DBG] = 15,
 	[Lights::CH_CW] = 2,
-	[Lights::CH_WW] = 0,
-	[Lights::CH_RED] = 4,
-	[Lights::CH_GREEN] = 16,
-	[Lights::CH_BLUE] = 17,
+	[Lights::CH_WW] = 16,
+	[Lights::CH_RED] = 0,
+	[Lights::CH_GREEN] = 17,
+	[Lights::CH_BLUE] = 4,
 };
 
 static constexpr uint32_t PWM_FREQ_HZ = 10000;
