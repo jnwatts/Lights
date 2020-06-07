@@ -16,8 +16,8 @@ Wifi wifi;
 static void lightsFunc(void *arg);
 static void wifiFunc(void *arg);
 
-const int LIGHTS_STACK_SIZE = 4096;
-const int WIFI_STACK_SIZE = 4096;
+static const int LIGHTS_STACK_SIZE = 4096;
+static const int WIFI_STACK_SIZE = 4096;
 
 extern "C"
 void app_main(void)
