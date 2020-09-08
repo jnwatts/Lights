@@ -1,0 +1,8 @@
+{
+    "name": "Lights",
+    "short_name": "Lights",
+    "start_url": "/lights",
+    "display": "standalone",
+    "theme_color": "#fff",
+    "background_color": "#000"
+}
