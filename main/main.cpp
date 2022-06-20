@@ -22,7 +22,7 @@ static const int WIFI_STACK_SIZE = 4096;
 extern "C"
 void app_main(void)
 {
-	printf("Lights v1.0\n");
+	printf("Lights v1.1\n");
 
 	xTaskCreatePinnedToCore((TaskFunction_t)&wifiFunc, "task_wifi", WIFI_STACK_SIZE, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore((TaskFunction_t)&lightsFunc, "task_lights", LIGHTS_STACK_SIZE, NULL, 1, NULL, 1);
