@@ -36,7 +36,7 @@ static void lightsFunc(void *arg)
 {
 	lights.setup();
 
-	lights.mode(Lights::MODE_OFF);
+	lights.mode(Lights::MODE_DEMO);
 
 	for (;;)
 		lights.loop();
