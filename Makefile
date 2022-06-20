@@ -5,7 +5,7 @@ all: build
 IDF_PORT ?= /dev/ttyUSB1
 
 
-build menuconfig:
+fullclean build menuconfig:
 	idf.py $@
 
 flash monitor:
