@@ -7,6 +7,8 @@
 
 #define DEFAULT_SSID "changeme"
 #define DEFAULT_PASS "changemetoo"
+#define WIFI_CONNECT_TIMEOUT_MS 30000
+#define WIFI_STATUS_TIMEOUT_MS  30000
 
 extern const uint8_t index_html_start[] asm("_binary_index_html_start");
 extern const uint8_t index_html_end[]   asm("_binary_index_html_end");
@@ -45,20 +47,84 @@ void Wifi::setup()
 		ESP_ERROR_CHECK(esp_netif_set_hostname(sta_netif, "lights"));
 		ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-		// ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, NULL));
 		ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &Wifi::wifi_event_handler, this, NULL));
+		ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &Wifi::wifi_event_handler, this, NULL));
+		ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &Wifi::wifi_event_handler, this, NULL));
 
 		ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 		ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
-		ESP_ERROR_CHECK(esp_wifi_start());
-		ESP_ERROR_CHECK(esp_wifi_connect());
+		ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+		this->wifi_start();
 	}
+
 }
 
 void Wifi::loop()
 {
-	// Nothing
+	if ((this->wifi_timeout_ms > 0) && (xTaskGetTickCount() * portTICK_PERIOD_MS >= this->wifi_timeout_ms)) {
+		esp_err_t err;
+		wifi_ap_record_t ap_info;
+
+		err = esp_wifi_sta_get_ap_info(&ap_info);
+		if (err != ESP_OK) {
+			printf("Wifi timeout, restart...\n");
+			this->wifi_stop();
+			this->wifi_start();
+		} else {
+			printf("Wifi ok: %s %x:%x:%x:%x:%x:%x\n",
+				ap_info.ssid,
+				ap_info.bssid[0],
+				ap_info.bssid[1],
+				ap_info.bssid[2],
+				ap_info.bssid[3],
+				ap_info.bssid[4],
+				ap_info.bssid[5]);
+			this->wifi_timeout_ms += WIFI_STATUS_TIMEOUT_MS;
+		}
+	}
 }
+
+void Wifi::http_start(void)
+{
+	if (this->hd != nullptr)
+		return;
+
+	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+	httpd_uri_t uri_index = {
+		.uri = "/",
+		.method = HTTP_GET,
+		.handler = &Wifi::handle_index,
+		.user_ctx = this,
+	};
+	httpd_uri_t uri_get = {
+		.uri = "/get",
+		.method = HTTP_GET,
+		.handler = &Wifi::handle_get,
+		.user_ctx = this,
+	};
+	httpd_uri_t uri_set = {
+		.uri = "/set",
+		.method = HTTP_GET,
+		.handler = &Wifi::handle_set,
+		.user_ctx = this,
+	};
+
+	httpd_start(&this->hd, &config);
+
+	httpd_register_uri_handler(this->hd, &uri_index);
+	httpd_register_uri_handler(this->hd, &uri_get);
+	httpd_register_uri_handler(this->hd, &uri_set);
+}
+
+void Wifi::http_stop(void)
+{
+	if (this->hd == nullptr)
+		return;
+
+	httpd_stop(&this->hd);
+	this->hd = nullptr;
+}
+
 
 esp_err_t Wifi::handle_index(httpd_req_t *req)
 {
@@ -126,38 +192,36 @@ complete:
 	return ESP_OK;
 }
 
+void Wifi::wifi_start(void)
+{
+	ESP_ERROR_CHECK(esp_wifi_start());
+	ESP_ERROR_CHECK(esp_wifi_connect());
+	this->wifi_timeout_ms = (xTaskGetTickCount() * portTICK_PERIOD_MS) + WIFI_CONNECT_TIMEOUT_MS;
+}
+
+void Wifi::wifi_stop(void)
+{
+	this->wifi_timeout_ms = 0;
+	esp_wifi_disconnect();
+	esp_wifi_stop();
+}
+
 void Wifi::wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
 	Wifi *wifi = (Wifi*)arg;
+
 	if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-		// Httpd start
-		{
-			httpd_handle_t hd;
-			httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-			httpd_uri_t uri_index = {
-				.uri = "/",
-				.method = HTTP_GET,
-				.handler = &Wifi::handle_index,
-				.user_ctx = wifi,
-			};
-			httpd_uri_t uri_get = {
-				.uri = "/get",
-				.method = HTTP_GET,
-				.handler = &Wifi::handle_get,
-				.user_ctx = wifi,
-			};
-			httpd_uri_t uri_set = {
-				.uri = "/set",
-				.method = HTTP_GET,
-				.handler = &Wifi::handle_set,
-				.user_ctx = wifi,
-			};
+		printf("Got IP, starting HTTP\n");
+		wifi->http_start();
+	}
 
-			httpd_start(&hd, &config);
+	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED) {
+		printf("Wifi connected\n");
+		wifi->wifi_timeout_ms = (xTaskGetTickCount() * portTICK_PERIOD_MS);
+	}
 
-			httpd_register_uri_handler(hd, &uri_index);
-			httpd_register_uri_handler(hd, &uri_get);
-			httpd_register_uri_handler(hd, &uri_set);
-		}
+	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+		printf("Wifi disconnected\n");
+		wifi->wifi_timeout_ms = (xTaskGetTickCount() * portTICK_PERIOD_MS) + WIFI_CONNECT_TIMEOUT_MS;
 	}
 }
