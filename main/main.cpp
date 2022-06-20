@@ -52,7 +52,6 @@ static void wifiFunc(void *arg)
 	printf("wifi loop\n");
 	for (;;) {
 		wifi.loop();
-#warning TODO: Handle connection loss. I probably need to un/re-register httpd?
 		vTaskDelay(100);
 	}
 }
