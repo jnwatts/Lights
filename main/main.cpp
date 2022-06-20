@@ -38,8 +38,10 @@ static void lightsFunc(void *arg)
 
 	lights.mode(Lights::MODE_DEMO);
 
-	for (;;)
+	for (;;) {
 		lights.loop();
+		vTaskDelay(1);
+	}
 }
 
 static void wifiFunc(void *arg)
